@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{minted}
+\makeatletter
+\renewcommand\thesubsection{1.\@arabic\c@subsection}
+\makeatother
+\title{Chapter 1}
+\author{Mahdi}
+\date\today
+\begin{document}
+
+\subsection{}
+\begin{description}
+  \item[$\bullet$] 10
+  \item[$\bullet$] $5+3+4 = 12$
+  \item[$\bullet$] $9-1 = 8$
+  \item[$\bullet$] $6/2 = 3$
+  \item[$\bullet$] $(2 \times 4) + (4-6) = 8-2 = 6$
+  \item[$\bullet$] $3$ (I'm not sure if the interpreter would show another representation for the newly defined object $a$0
+  \item[$\bullet$] $3+1 = 4$
+  \item[$\bullet$] $3 + 4 + 3 \times 4 = 19$
+  \item[$\bullet$] $3\neq 4 \rightarrow false$
+  \item[$\bullet$] $4 > 3 \; and \; 4 < 12 \rightarrow true \; and \; true \rightarrow b $
+  \item[$\bullet$] $b \eq 4 \rightarrow 6 + 7 + 3 = 16$
+  \item[$\bullet$] $4 > 3 \rightarrow 2 + 4 = 6$
+  \item[$\bullet$] $3 < 4 \rightarrow 4 \times (3 + 1) = 16$
+\end{description}
+
+\subsection{}
+\begin{minted}{scheme}
+(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5))))) (* 3 (- 6 2) (- 2 7)))
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+(define (SotSotTLN a b c) 
+    (if (> a b)
+            (if (> c b)
+                (+ (* a a) (* c c))
+                (+ (* a a) (* b b)))
+            (if (> c a)
+                (+ (* b b) (* c c))
+                (+ (* a a) (* b b))))
+\end{minted}
+
+\subsection{}
+it adds the absolute value of b to a.
+
+\subsection{}
+If the interpreter uses applicative-order evaluation, it will try to evaluate the operands first. Hence the interpreter will try to evaluate p and will get stuck in an infinite loop since p is defined as itself.
+If the interpreter uses normal-order evaluation (lazy), it will compare 0 with 0 (since test is defined as the comparison) and will return the first result which is 0.
+
+\subsection{}
+new-if will not yield a result due to applicative-order evaluation that happens in the definition of new-if. This will leave the new-if in an infinite loop (likely stack overflow) since the parameters passed to new-if are being evaluated before the condition does regardless of whether the guess is small enough or not. In lazy evaluation however, the parameters will be evaluated only if needed. When the guess is good enough, the evaluation will stop without calculating the unneeded if condition.
+
+\subsection{}
+
+
+\end{document}
