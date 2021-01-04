@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{minted}
+\usemintedstyle{friendly}
 \makeatletter
 \renewcommand\thesubsection{1.\@arabic\c@subsection}
 \makeatother
@@ -53,8 +54,4 @@ If the interpreter uses normal-order evaluation (lazy), it will compare 0 with 0
 
 \subsection{}
 new-if will not yield a result due to applicative-order evaluation that happens in the definition of new-if. This will leave the new-if in an infinite loop (likely stack overflow) since the parameters passed to new-if are being evaluated before the condition does regardless of whether the guess is small enough or not. In lazy evaluation however, the parameters will be evaluated only if needed. When the guess is good enough, the evaluation will stop without calculating the unneeded if condition.
-
-\subsection{}
-
-
 \end{document}
