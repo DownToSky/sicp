@@ -108,4 +108,41 @@ x
      (if (= 0 (remainder n d)) 
          (find-exp (/ n b) b (+ x 1)) i)) 
 \end{minted}
+\subsection{}
+Using substitution to derive one and two:
+\begin{minted}{scheme}
+(add-1 zero)
+(lambda (f) (lambda (x) (f (((lambda (f) (lambda (x) x)) f) x))))
+(lambda (f) (lambda (x) (f ((lambda (f) (lambda (x) x)) x))))
+(lambda (f) (lambda (x) (f x)))
+\end{minted}
+\begin{minted}{scheme}
+(add-1 (add-1 zero))
+(add-1 (lambda (f) (lambda (x) (f x))))
+((lambda (f) (lambda (x) (f ((n f) x)))) (lambda (f) (lambda (x) (f x))))
+(lambda (f) (lambda (x) (f (((lambda (f) (lambda (x) (f x))) f) x))))
+(lambda (f) (lambda (x) (f ((lambda (f) (lambda (x) (f x))) x))))
+(lambda (f) (lambda (x) (f (f x))))
+\end{minted}
+We can inductively show that We need to return $f^n(f^m(x))$ so the add procedure would be:
+\begin{minted}{scheme}
+(define (add n m)
+  (lambda (f)(lambda (x)((n f)((m f) x))))) 
+\end{minted}
+\subsection{}
+Assuming we don't know the order the interval is sent:
+\begin{minted}{scheme}
+(define (upper-bound a) (max (car a) (cdr a))) 
+(define (lower-bound a) (min (car a) (cdr a))) 
+\end{minted}
+\subsection{}
+Remember $a-b=a+(-b)$:
+\begin{minted}{scheme}
+(define (sub-interval x y)
+    (add-interval x 
+        (make-interval (- (upper-bound y)) 
+                       (- (lower-bound y))))) 
+\end{minted}
+\subsection{}
+
 \end{document}
