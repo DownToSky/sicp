@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+\usepackage{tikz}
 \usepackage{minted}
 \usemintedstyle{friendly}
 \makeatletter
@@ -143,6 +144,376 @@ Remember $a-b=a+(-b)$:
         (make-interval (- (upper-bound y)) 
                        (- (lower-bound y))))) 
 \end{minted}
+
+\subsection{}
+We have the following rule for addition: \newline 
+$[LowA, HighA] + [LowB, HighA] = [LowA + LowB, HighA + HighB]$ \newline
+Since width of the sum is $\frac{HighA + HighB - LowA - LowB}{2}$ which is equal to the sum of A and B, we can say the sum function is a function of the width of two segments. Without loss of generality, we can show the same thing for subtraction.\newline
+However, for multiplication of $A=[-1,1]$ and $B=[0,10]$:\newline
+$A \cross B = [-10, 10]$
+Which is an example of multiplication not being function of the width (Width of A is 1 and B is 5 but their product's width is 10)
+
+\subsection{}
+We use the multiplication function previously defined and add a condition to check if the lower and upper bound of the denominator are of different signs or one is 0:
+\begin{minted}{scheme}
+(define (div-interval x y) 
+   (if (> 0 (* (lower-bound y) (upper-bound y))) 
+       (mul-interval x  
+                     (make-interval (/ 1. (upper-bound y)) 
+                                    (/ 1. (lower-bound y)))))
+        (display "Error: denominator spans 0") 
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+ (define (mul-interval x y) 
+     (cond ((and (>= (lower-bound x) 0) (>= (lower-bound y) 0)) 
+            (make-interval (* (lower-bound x) (lower-bound y)) 
+                            (* (upper-bound x) (upper-bound y))))
+            ((and (>= (upper-bound x) 0) (>= (upper-bound y) 0)) 
+              (make-interval (min (* (lower-bound x) (upper-bound y)) 
+                                (* (upper-bound x) (lower-bound y))) 
+                             (max (* (lower-bound x) (lower-bound y)) 
+                                (* (upper-bound x) (upper-bound y)))))
+              ((and (>= (upper-bound x) 0) (< (upper-bound y) 0)) 
+            (make-interval (* (upper-bound x) (lower-bound y)) 
+                            (* (lower-bound x) (lower-bound y))))
+            ((and (< (upper-bound x) 0) (>= (upper-bound y) 0)) 
+            (make-interval (* (lower-bound x) (upper-bound y)) 
+                            (* (lower-bound x) (lower-bound y))))
+           ((and (>= (lower-bound x) 0) (< (lower-bound y) 0)) 
+            (make-interval (* (upper-bound x) (lower-bound y)) 
+                        (* (if (< (upper-bound y) 0) (lower-bound x) 
+                                    (upper-bound x)) (upper-bound y)))) 
+           ((and (< (lower-bound x) 0) (>= (lower-bound y) 0)) 
+            (make-interval (* (lower-bound x) (upper-bound y)) 
+                            (* (upper-bound x) (if (< (upper-bound x) 0) 
+                                (lower-bound y) (upper-bound y))))) 
+           (else 
+            (make-interval (* (upper-bound x) (upper-bound y))
+                            (* (lower-bound x) (lower-bound y))))))
+\end{minted}
+
+\subsection{}
+We need to slightly redefine how we approach this.
+\begin{minted}{scheme}
+(define (make-center-percent c p)
+    (make-center-width c (* c p 0.01)))
+
+(define (percent i)
+    (* 100.0 (/ (width i) (center i))))
+    
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i)
+        (upper-bound i))
+     2))
+
+(define (width i)
+  (/ (- (upper-bound i)
+        (lower-bound i))
+     2))
+\end{minted}
+
+\subsection{}
+For small tolerance, the tolerance of the product is close to the sum of tolerances.
+\begin{minted}{scheme}
+(define (mul-interval x y)
+  (make-center-percent (* (center x) (center y))
+                       (+ (percent x) (percent y))))
+\end{minted}
+
+\subsection{}
+For high center values and low tolerance percentages (e.g. center value in 1000s and tolerance in 0.01), we will get different tolerance percentage values by multiplication.
+
+\subsection{}
+Par2 will preserve the tolerance. Eva is right
+
 \subsection{}
 
+\subsection{}
+\begin{minted}{scheme}
+(define (last-pair n) 
+  (if (null? (cdr n)) 
+      n 
+      (last-pair (cdr n))))
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+(define (reverse items) 
+   (if (null? (cdr items)) 
+       items 
+       (append (reverse (cdr items)) 
+               (cons (car items) '())))) 
+\end{minted}
+\subsection{}
+The order does not matter.
+
+\begin{minted}{scheme}
+(define (first-denomination coin-values)(car coin-values))
+
+(define (except-first-denomination coin-values)(cdr coin-values))
+
+(define (no-more? coin-values)(null? coin-values))
+  
+(define (cc amount coin-values)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (no-more? coin-values)) 0)
+        (else(+ (cc amount
+                 (except-first-denomination coin-values))
+                 (cc (- amount
+                    (first-denomination coin-values))
+                 coin-values)))))
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+(define (same-parity head . tail)
+  (define (iter items acc)
+    (if (null? items)
+        acc
+        (iter (cdr items)
+              (if (even? (+ (car items) head))
+                  (append acc (list (car items)))
+                  acc))))
+  (cons head (iter tail '())))
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+(define (square-list-m items) 
+(map square items)) 
+(define (square-list items) 
+(if (null? items) 
+   '() 
+   (cons (square (car items)) 
+         (square-list (cdr items))))) 
+\end{minted}
+
+\subsection{}
+It does not work because the front of the list is appended to the head, so the answer is reversed.
+\begin{minted}{scheme}
+(define (square-list items) 
+     (define (iter l pick) 
+         (define r (square (car l))) 
+         (if (null? (cdr l)) 
+             (pick (list r)) 
+             (iter (cdr l) (lambda (x) (pick (cons r x)))))) 
+     (iter items (lambda (x) x))) 
+\end{minted}
+
+\subsection{}
+\begin{minted}{scheme}
+(define (for-each proc list) 
+   (cond 
+    ((null? list) #t) 
+    (else (proc (car list)) 
+          (for-each proc (cdr list))))) 
+\end{minted}
+
+\subsection{}
+\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+%uncomment if require: \path (0,289); %set diagram left start at 0, and has height of 289
+
+%Shape: Rectangle [id:dp7396259476780698] 
+\draw   (47,23) -- (88,23) -- (88,63) -- (47,63) -- cycle ;
+%Shape: Rectangle [id:dp0046750739385326145] 
+\draw   (88,23) -- (129,23) -- (129,63) -- (88,63) -- cycle ;
+%Shape: Rectangle [id:dp039003333712372634] 
+\draw   (186,23) -- (227,23) -- (227,63) -- (186,63) -- cycle ;
+%Shape: Rectangle [id:dp1413236160208844] 
+\draw   (227,23) -- (268,23) -- (268,63) -- (227,63) -- cycle ;
+%Shape: Rectangle [id:dp9779938278554079] 
+\draw   (184,96) -- (225,96) -- (225,136) -- (184,136) -- cycle ;
+%Shape: Rectangle [id:dp11083638284285013] 
+\draw   (225,96) -- (266,96) -- (266,136) -- (225,136) -- cycle ;
+%Shape: Rectangle [id:dp18684682250792684] 
+\draw   (300,93) -- (341,93) -- (341,133) -- (300,133) -- cycle ;
+%Shape: Rectangle [id:dp10425943385666814] 
+\draw   (341,93) -- (382,93) -- (382,133) -- (341,133) -- cycle ;
+%Shape: Rectangle [id:dp9622550721419202] 
+\draw   (301,170) -- (342,170) -- (342,210) -- (301,210) -- cycle ;
+%Shape: Rectangle [id:dp4914144604888687] 
+\draw   (342,170) -- (383,170) -- (383,210) -- (342,210) -- cycle ;
+%Shape: Rectangle [id:dp6945504650258751] 
+\draw   (423,170) -- (464,170) -- (464,210) -- (423,210) -- cycle ;
+%Shape: Rectangle [id:dp04983388801684585] 
+\draw   (464,170) -- (505,170) -- (505,210) -- (464,210) -- cycle ;
+%Straight Lines [id:da9228763059929557] 
+\draw    (136,43) -- (179,43) ;
+\draw [shift={(181,43)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da2736300069137503] 
+\draw    (266,112) -- (292,112) ;
+\draw [shift={(294,112)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da6522248464435669] 
+\draw    (387,190) -- (399,190) -- (413,190) ;
+\draw [shift={(415,190)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da7271309986751415] 
+\draw    (314,139) -- (314,164) ;
+\draw [shift={(314,166)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da17157206482949505] 
+\draw    (205,66) -- (205,91) ;
+\draw [shift={(205,93)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Shape: Rectangle [id:dp3507025329143727] 
+\draw   (48,94) -- (90,94) -- (90,134) -- (48,134) -- cycle ;
+%Shape: Rectangle [id:dp3294633592605868] 
+\draw   (181,154) -- (223,154) -- (223,194) -- (181,194) -- cycle ;
+%Shape: Rectangle [id:dp18704385771546006] 
+\draw   (299,231) -- (341,231) -- (341,271) -- (299,271) -- cycle ;
+%Shape: Rectangle [id:dp6191843856232476] 
+\draw   (424,233) -- (466,233) -- (466,273) -- (424,273) -- cycle ;
+%Straight Lines [id:da884404132410186] 
+\draw    (319,214) -- (319,232) ;
+\draw [shift={(319,234)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da9759198622159776] 
+\draw    (443,215) -- (443,233) ;
+\draw [shift={(443,235)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da4921115178834501] 
+\draw    (200,133) -- (200,151) ;
+\draw [shift={(200,153)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da7965501579529375] 
+\draw    (67,70) -- (67,88) ;
+\draw [shift={(67,90)}, rotate = 270] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da9622463833402958] 
+\draw    (129,23) -- (88,63) ;
+%Straight Lines [id:da7652148420540664] 
+\draw    (268,23) -- (227,63) ;
+%Straight Lines [id:da7171618951487849] 
+\draw    (382,93) -- (341,133) ;
+%Straight Lines [id:da24349145312779097] 
+\draw    (505,170) -- (464,210) ;
+%Shape: Ellipse [id:dp1949303566861087] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (62,48) .. controls (62,45.24) and (64.46,43) .. (67.5,43) .. controls (70.54,43) and (73,45.24) .. (73,48) .. controls (73,50.76) and (70.54,53) .. (67.5,53) .. controls (64.46,53) and (62,50.76) .. (62,48) -- cycle ;
+%Shape: Ellipse [id:dp8203550840897774] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (199,116) .. controls (199,113.24) and (201.46,111) .. (204.5,111) .. controls (207.54,111) and (210,113.24) .. (210,116) .. controls (210,118.76) and (207.54,121) .. (204.5,121) .. controls (201.46,121) and (199,118.76) .. (199,116) -- cycle ;
+%Shape: Ellipse [id:dp15219783879216187] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (201,43) .. controls (201,40.24) and (203.46,38) .. (206.5,38) .. controls (209.54,38) and (212,40.24) .. (212,43) .. controls (212,45.76) and (209.54,48) .. (206.5,48) .. controls (203.46,48) and (201,45.76) .. (201,43) -- cycle ;
+%Shape: Ellipse [id:dp0030258428680621785] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (315,113) .. controls (315,110.24) and (317.46,108) .. (320.5,108) .. controls (323.54,108) and (326,110.24) .. (326,113) .. controls (326,115.76) and (323.54,118) .. (320.5,118) .. controls (317.46,118) and (315,115.76) .. (315,113) -- cycle ;
+%Shape: Ellipse [id:dp05268041291030834] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (316,190) .. controls (316,187.24) and (318.46,185) .. (321.5,185) .. controls (324.54,185) and (327,187.24) .. (327,190) .. controls (327,192.76) and (324.54,195) .. (321.5,195) .. controls (318.46,195) and (316,192.76) .. (316,190) -- cycle ;
+%Shape: Ellipse [id:dp20983017357706846] 
+\draw  [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ,fill opacity=1 ] (438,190) .. controls (438,187.24) and (440.46,185) .. (443.5,185) .. controls (446.54,185) and (449,187.24) .. (449,190) .. controls (449,192.76) and (446.54,195) .. (443.5,195) .. controls (440.46,195) and (438,192.76) .. (438,190) -- cycle ;
+
+% Text Node
+\draw (69,114) node    {$1$};
+% Text Node
+\draw (202,174) node    {$2$};
+% Text Node
+\draw (320,251) node    {$3$};
+% Text Node
+\draw (445,253) node    {$4$};
+
+
+\end{tikzpicture}
+
+\subsection{}
+\begin{minted}{scheme}
+ (car (cdr (car (cdr (cdr list1)))))
+ (car (car list2))
+ ;cadr is car then cdr in that order
+ (cadr (cadr (cadr (cadr (cadr (cadr list3))))))
+\end{minted}
+ 
+\subsection{}
+\begin{minted}{scheme}
+ (1 2 3 4 5 6)
+ ((1 2 3) 4 5 6)
+ ;Two separate lists:
+ ((1 2 3) (4 5 6))
+\end{minted}
+ 
+\subsection{}
+\begin{minted}{scheme}
+  (define (deep-reverse li) 
+   (cond ((null? li) '()) 
+         ((not (pair? li)) li) 
+         (else (append (deep-reverse (cdr li))  
+                       (list (deep-reverse (car li))))))) 
+ \end{minted}
+ 
+\subsection{}
+This is just a DFS in a particular order.
+\begin{minted}{scheme}
+(define (fringe tree)
+  (define (iter tree acc)
+    (if (null? tree)
+        acc
+        (let ((head (car tree))
+              (tail (cdr tree)))
+          (if (list? head)
+              (iter tail (append acc (fringe head)))
+              (iter tail (append acc (list head)))))))
+  (iter tree '()))
+\end{minted}
+
+\subsection{}
+\subsubsection{}
+\begin{minted}{scheme}
+(define (left-branch mobile)
+  (car mobile))
+(define (right-branch mobile)
+  (car (cdr mobile)))
+
+(define (branch-length branch)
+  (car branch))
+(define (branch-structure branch)
+  (car (cdr branch)))
+\end{minted}
+
+\subsubsection{}
+\begin{minted}{scheme}
+(define (mobile? structure)
+  (list? structure))
+  
+(define (branch-weight branch)
+  (let ((structure (branch-structure branch)))
+    (if (mobile? structure)
+        (total-weight structure)
+        structure)))
+(define (total-weight mobile)
+  (let ((left (left-branch mobile))
+        (right (right-branch mobile)))
+    (+ (branch-weight left)
+       (branch-weight right))))
+       \end{minted}
+\subsubsection{}
+\begin{minted}{scheme}
+(define (total-weight mobile)
+  (let ((left (left-branch mobile))
+        (right (right-branch mobile)))
+    (+ (branch-weight left)
+       (branch-weight right))))
+
+
+(define (torque branch)
+  (* (branch-length branch)
+     (let ((structure (branch-structure branch)))
+       (if (mobile? structure)
+           (total-weight structure)
+           structure))))
+
+(define (branch-balanced? left right)
+  (= (torque left)
+     (torque right)))
+
+(define (balanced? mobile)
+  (let ((left (left-branch mobile))
+        (right (right-branch mobile)))
+    (let ((left-structure (branch-structure left))
+          (right-structure (branch-structure right)))
+      (and (branch-balanced? left right)
+           (if (mobile? left-structure)
+               (balanced? left-structure)
+               #t)
+           (if (mobile? right-structure)
+               (balanced? right-structure)
+               #t)))))
+               \end{minted}
+\subsubsection{}
+This goes back to earlier talk in the chapter 2.1. Since the rest of the functions are build on top of the getter of mobile branch, we only need to change those without change to the rest of the representation.
 \end{document}
